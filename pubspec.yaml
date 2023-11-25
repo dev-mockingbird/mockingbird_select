@@ -9,7 +9,6 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  animate_do:
 
 dev_dependencies:
   flutter_test:
