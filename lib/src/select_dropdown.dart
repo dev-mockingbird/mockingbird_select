@@ -19,6 +19,9 @@ class MockingbirdSelect<T> extends StatefulWidget {
   final ItemBuilder<T> itemBuilder;
   final Function(String)? onInput;
   final InputDecoration? inputDecoration;
+  final BoxDecoration? selectedDecoration;
+  final Function(TextEditingController)? onEnter;
+  final Function(List<T> selected)? onSelectedChanged;
   final List<T> items;
   final Color? dropdownBgColor;
   final double dropdownElevation;
@@ -34,6 +37,9 @@ class MockingbirdSelect<T> extends StatefulWidget {
     this.onInput,
     this.dropdownBgColor,
     this.dropdownElevation = 0.0,
+    this.selectedDecoration,
+    this.onEnter,
+    this.onSelectedChanged,
   });
   @override
   State<StatefulWidget> createState() => _StateMockingbirdSelect<T>();
@@ -63,6 +69,7 @@ class _StateMockingbirdSelect<T> extends State<MockingbirdSelect<T>> {
           focusNode: _focusNode,
           onInput: widget.onInput,
           decoration: widget.inputDecoration,
+          onEnter: widget.onEnter,
           onFucusChanged: (focus) {
             _inputFocused = focus;
             shouldToggleDropdown(setOpened);
@@ -113,24 +120,32 @@ class _StateMockingbirdSelect<T> extends State<MockingbirdSelect<T>> {
   }
 
   unselect(T item) {
-    setState(() {
-      selected.remove(item);
-    });
-    Future.delayed(const Duration(milliseconds: 50))
-        .then((value) => _focusNode.requestFocus());
+    selected.remove(item);
+    if (widget.onSelectedChanged != null) {
+      widget.onSelectedChanged!(selected);
+    }
+    setState(() {});
+    Future.delayed(const Duration(milliseconds: 50)).then(
+      (value) => _focusNode.requestFocus(),
+    );
   }
 
   select(T item, bool select) {
     _setItemClick();
-    setState(() {
-      if (!select) {
-        selected.remove(item);
-        return;
+    if (!select) {
+      selected.remove(item);
+      if (widget.onSelectedChanged != null) {
+        widget.onSelectedChanged!(selected);
       }
-      if (!selected.contains(item)) {
-        selected.add(item);
+      return;
+    }
+    if (!selected.contains(item)) {
+      selected.add(item);
+      if (widget.onSelectedChanged != null) {
+        widget.onSelectedChanged!(selected);
       }
-    });
+    }
+    setState(() {});
   }
 
   _setItemClick() {
@@ -148,7 +163,6 @@ class _SelectDropdown extends StatefulWidget {
   final double elevation;
   final List<Widget> items;
   const _SelectDropdown({
-    super.key,
     required this.constraints,
     required this.items,
     this.bgColor,

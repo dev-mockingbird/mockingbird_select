@@ -25,6 +25,8 @@ class SelectDropdownTrigger<T> extends StatefulWidget {
   final FocusNode focusNode;
   final Function(String input)? onInput;
   final InputDecoration? decoration;
+  final BoxDecoration? prefixDecoration;
+  final Function(TextEditingController)? onEnter;
   const SelectDropdownTrigger({
     super.key,
     required this.onFucusChanged,
@@ -35,6 +37,8 @@ class SelectDropdownTrigger<T> extends StatefulWidget {
     this.decoration,
     this.onInput,
     this.onBackspace,
+    this.onEnter,
+    this.prefixDecoration,
   });
 
   @override
@@ -86,18 +90,23 @@ class _StateSelectDropdownTrigger<T> extends State<SelectDropdownTrigger<T>> {
   }
 
   _onKey(RawKeyEvent key) {
-    if (_lastInput == "" &&
-        key.logicalKey == LogicalKeyboardKey.backspace &&
-        widget.onBackspace != null) {
-      if (_debounce != null) {
-        return;
-      }
-      _debounce = Timer(const Duration(milliseconds: 200), () {
-        widget.onBackspace!();
-        _debounce = null;
-      });
+    if (_debounce != null) {
+      return;
     }
-    _lastInput = controller.text;
+    _debounce = Timer(const Duration(milliseconds: 200), () {
+      if (_lastInput == "" &&
+          key.logicalKey == LogicalKeyboardKey.backspace &&
+          widget.onBackspace != null) {
+        widget.onBackspace!();
+      }
+      _lastInput = controller.text;
+
+      if (widget.onEnter != null &&
+          key.logicalKey == LogicalKeyboardKey.enter) {
+        widget.onEnter!(controller);
+      }
+      _debounce = null;
+    });
   }
 
   _buildSelected() {
@@ -107,11 +116,14 @@ class _StateSelectDropdownTrigger<T> extends State<SelectDropdownTrigger<T>> {
       }
       return ConstrainedBox(
         constraints: BoxConstraints(maxWidth: constraints.maxWidth / 2),
-        child: Wrap(
-          crossAxisAlignment: WrapCrossAlignment.center,
-          children: widget.selected
-              .map((e) => widget.selectedBuilder(context, e, widget.unselect))
-              .toList(),
+        child: Container(
+          decoration: widget.prefixDecoration,
+          child: Wrap(
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: widget.selected
+                .map((e) => widget.selectedBuilder(context, e, widget.unselect))
+                .toList(),
+          ),
         ),
       );
     });

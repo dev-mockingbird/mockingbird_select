@@ -114,14 +114,20 @@ class _MyHomePageState extends State<MyHomePage> {
                   border: OutlineInputBorder(),
                   hintText: "请输入标签",
                 ),
+                onEnter: (input) {
+                  print("entered: ${input.text}");
+                },
+                onSelectedChanged: (selected) {
+                  print(selected);
+                },
                 selectedBuilder: (context, item, unselect) {
                   return GestureDetector(
                       onTap: () {
                         unselect(item);
                       },
                       child: Container(
-                          margin:
-                              EdgeInsets.symmetric(horizontal: 5, vertical: 10),
+                          margin: const EdgeInsets.symmetric(
+                              horizontal: 5, vertical: 10),
                           child: Text(item)));
                 },
                 onInput: (String keyword) {},
