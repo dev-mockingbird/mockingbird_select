@@ -57,6 +57,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
+  bool _showDropdown = true;
 
   void _incrementCounter() {
     setState(() {
@@ -106,36 +107,52 @@ class _MyHomePageState extends State<MyHomePage> {
           // wireframe for each widget.
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Container(
-              padding: const EdgeInsets.all(10),
-              child: MockingbirdSelect<String>(
-                dropdownElevation: 8.0,
-                inputDecoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  hintText: "请输入标签",
-                ),
-                onEnter: (input) {
-                  print("entered: ${input.text}");
-                },
-                onSelectedChanged: (selected) {
-                  print(selected);
-                },
-                selectedBuilder: (context, item, unselect) {
-                  return GestureDetector(
-                      onTap: () {
-                        unselect(item);
-                      },
-                      child: Container(
-                          margin: const EdgeInsets.symmetric(
-                              horizontal: 5, vertical: 10),
-                          child: Text(item)));
-                },
-                onInput: (String keyword) {},
-                itemBuilder: buildStringDropdownItem,
-                dropdownHeight: 200,
-                items: ["Hello World", "C++", "QT", "Kubernetes", "Worldwide"],
-              ),
+            TextButton(
+              onPressed: () {
+                setState(() {
+                  _showDropdown = !_showDropdown;
+                });
+              },
+              child: Text(_showDropdown ? "隐藏" : "打开"),
             ),
+            if (_showDropdown)
+              Container(
+                padding: const EdgeInsets.all(10),
+                child: MockingbirdSelect<String>(
+                  dropdownElevation: 8.0,
+                  inputDecoration: const InputDecoration(
+                    border: OutlineInputBorder(),
+                    hintText: "请输入标签",
+                  ),
+                  onEnter: (input) {
+                    print("entered: ${input.text}");
+                  },
+                  onSelectedChanged: (selected) {
+                    print(selected);
+                  },
+                  selectedBuilder: (context, item, unselect) {
+                    return GestureDetector(
+                        onTap: () {
+                          unselect(item);
+                        },
+                        child: Container(
+                            margin: const EdgeInsets.symmetric(
+                                horizontal: 5, vertical: 10),
+                            child: Text(item)));
+                  },
+                  onInput: (String keyword) {},
+                  itemBuilder: buildStringDropdownItem,
+                  dropdownHeight: 200,
+                  selected: ["Hello World"],
+                  items: [
+                    "Hello World",
+                    "C++",
+                    "QT",
+                    "Kubernetes",
+                    "Worldwide"
+                  ],
+                ),
+              ),
           ],
         ),
       ),

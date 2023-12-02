@@ -23,6 +23,7 @@ class MockingbirdSelect<T> extends StatefulWidget {
   final Function(TextEditingController)? onEnter;
   final Function(List<T> selected)? onSelectedChanged;
   final List<T> items;
+  final List<T>? selected;
   final Color? dropdownBgColor;
   final double dropdownElevation;
   final double dropdownHeight;
@@ -40,19 +41,21 @@ class MockingbirdSelect<T> extends StatefulWidget {
     this.selectedDecoration,
     this.onEnter,
     this.onSelectedChanged,
+    this.selected,
   });
   @override
   State<StatefulWidget> createState() => _StateMockingbirdSelect<T>();
 }
 
 class _StateMockingbirdSelect<T> extends State<MockingbirdSelect<T>> {
-  final List<T> selected = [];
+  List<T> _selected = [];
   bool _inputFocused = false;
   bool _itemClicked = false;
   final FocusNode _focusNode = FocusNode();
 
   @override
   void initState() {
+    _selected = widget.selected ?? [];
     super.initState();
   }
 
@@ -75,14 +78,14 @@ class _StateMockingbirdSelect<T> extends State<MockingbirdSelect<T>> {
             shouldToggleDropdown(setOpened);
           },
           onBackspace: () {
-            if (selected.isNotEmpty) {
+            if (_selected.isNotEmpty) {
               setState(() {
-                selected.removeLast();
+                _selected.removeLast();
               });
             }
           },
           selectedBuilder: widget.selectedBuilder,
-          selected: selected,
+          selected: _selected,
           unselect: unselect,
         );
       },
@@ -92,7 +95,7 @@ class _StateMockingbirdSelect<T> extends State<MockingbirdSelect<T>> {
               (v) => widget.itemBuilder(
                 context,
                 v,
-                selected.contains(v),
+                _selected.contains(v),
                 select,
               ),
             )
@@ -112,7 +115,7 @@ class _StateMockingbirdSelect<T> extends State<MockingbirdSelect<T>> {
       setOpened(true);
       return;
     }
-    Future.delayed(const Duration(milliseconds: 100)).then((value) {
+    Future.delayed(const Duration(milliseconds: 200)).then((value) {
       if (!_itemClicked) {
         setOpened(false);
       }
@@ -120,9 +123,10 @@ class _StateMockingbirdSelect<T> extends State<MockingbirdSelect<T>> {
   }
 
   unselect(T item) {
-    selected.remove(item);
+    _setItemClick();
+    _selected.remove(item);
     if (widget.onSelectedChanged != null) {
-      widget.onSelectedChanged!(selected);
+      widget.onSelectedChanged!(_selected);
     }
     setState(() {});
     Future.delayed(const Duration(milliseconds: 50)).then(
@@ -133,16 +137,17 @@ class _StateMockingbirdSelect<T> extends State<MockingbirdSelect<T>> {
   select(T item, bool select) {
     _setItemClick();
     if (!select) {
-      selected.remove(item);
+      _selected.remove(item);
       if (widget.onSelectedChanged != null) {
-        widget.onSelectedChanged!(selected);
+        widget.onSelectedChanged!(_selected);
       }
+      setState(() {});
       return;
     }
-    if (!selected.contains(item)) {
-      selected.add(item);
+    if (!_selected.contains(item)) {
+      _selected.add(item);
       if (widget.onSelectedChanged != null) {
-        widget.onSelectedChanged!(selected);
+        widget.onSelectedChanged!(_selected);
       }
     }
     setState(() {});

@@ -63,6 +63,9 @@ class _StateMockingbirdDropdown extends State<MockingbirdDropdown> {
   }
 
   setOpened(bool opened) {
+    if (!mounted) {
+      return;
+    }
     if (opened == _opened) {
       return;
     }
@@ -74,10 +77,19 @@ class _StateMockingbirdDropdown extends State<MockingbirdDropdown> {
     });
   }
 
+  @override
+  void dispose() {
+    _entry?.remove();
+    super.dispose();
+  }
+
   void _showOverlay(BuildContext context) async {
+    if (!context.mounted) {
+      return;
+    }
     if (_entry != null) {
-      _entry!.remove();
-      _entry = null;
+      Overlay.of(context).setState(() {});
+      return;
     }
     RenderBox? renderBox = context.findRenderObject() as RenderBox?;
     var size = renderBox?.size ?? Size.zero;
